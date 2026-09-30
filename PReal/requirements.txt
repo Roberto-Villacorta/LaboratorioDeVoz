@@ -1,0 +1,22 @@
+# Dependencias principales del paquete PReal (Clonar, Almacenar y Usar Voces)
+
+# Procesamiento numérico y acústico básico
+numpy>=1.24.0
+soundfile>=0.12.1
+scipy>=1.10.0
+
+# Motores de aprendizaje profundo y síntesis de audio (TTS)
+torch>=2.0.0
+torchaudio>=2.0.0
+
+# Servidor API REST para conectar con interfaces frontend (Web / Electron / Desktop)
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+python-multipart>=0.0.6
+pydantic>=2.0.0
+
+# Procesamiento y extracción de documentos de texto y PDF (a Markdown / TXT)
+pypdf>=3.0.0
+
+# Opciones alternativas para interfaces rápidas en Python
+gradio>=4.0.0

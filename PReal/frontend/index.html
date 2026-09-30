@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Estudio de Voz PReal: Clonación, Almacenamiento y Síntesis de Voces">
+  <title>Estudio de Voz PReal</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <div class="contenedor-principal">
+    <header class="encabezado-app">
+      <div class="logo-titulo">
+        <span class="icono-logo">🎙️</span>
+        <h1>Estudio de Voz PReal</h1>
+      </div>
+      <div class="indicador-estado">
+        <span class="punto-conexion activo"></span>
+        <span id="texto-estado">API Conectada</span>
+      </div>
+    </header>
+
+    <nav class="navegacion-pestanas" aria-label="Navegación principal">
+      <button id="btn-pestana-sintesis" class="boton-pestana activa" onclick="cambiarPestana('sintesis')">
+        <span class="icono-pestana"></span> 1. Usar Voz (Síntesis)
+      </button>
+      <button id="btn-pestana-clonar" class="boton-pestana" onclick="cambiarPestana('clonar')">
+        <span class="icono-pestana"></span> 2. Clonar Voz
+      </button>
+      <button id="btn-pestana-biblioteca" class="boton-pestana" onclick="cambiarPestana('biblioteca')">
+        <span class="icono-pestana"></span> 3. Biblioteca de Voces
+      </button>
+    </nav>
+
+    <!-- 1. PESTAÑA DE SÍNTESIS Y USO DE VOZ -->
+    <section id="seccion-sintesis" class="seccion-contenido activa">
+      <div class="cabecera-seccion">
+        <h2>Generación y Uso de Voz</h2>
+        <p class="descripcion-seccion">Elige una voz de tu biblioteca, introduce un guión o sube un documento PDF/Markdown para sintetizar el audio.</p>
+      </div>
+
+      <div class="fila-formulario">
+        <div class="campo-formulario">
+          <label for="selector-voz-sintesis">Voz Seleccionada:</label>
+          <select id="selector-voz-sintesis">
+            <option value="">Cargando catálogo de voces...</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="campo-formulario">
+        <div class="cabecera-campo">
+          <label for="area-texto-sintesis">Texto o Guión a Sintetizar:</label>
+          <div class="acciones-documento">
+            <label for="formato-documento-sintesis" class="etiqueta-pequena">Formato:</label>
+            <select id="formato-documento-sintesis" class="selector-pequeno">
+              <option value="markdown">Markdown</option>
+              <option value="txt">Texto plano</option>
+            </select>
+            <label for="entrada-documento-sintesis" class="boton-accion-secundaria">
+               Cargar PDF / TXT / MD
+            </label>
+            <input type="file" id="entrada-documento-sintesis" accept=".pdf,.txt,.md,.markdown" class="oculto">
+          </div>
+        </div>
+        <textarea id="area-texto-sintesis" rows="5" placeholder="Escribe aquí el texto a sintetizar o carga un documento PDF/Markdown..."></textarea>
+        <div class="pie-campo">
+          <span id="contador-caracteres-sintesis" class="contador-caracteres">0 caracteres</span>
+        </div>
+      </div>
+
+      <div class="fila-formulario dos-columnas">
+        <div class="campo-formulario">
+          <label for="control-velocidad">Velocidad de Lectura (<span id="valor-velocidad">1.0</span>x):</label>
+          <input type="range" id="control-velocidad" min="0.5" max="2.0" step="0.05" value="1.0">
+        </div>
+        <div class="campo-formulario">
+          <label for="control-semilla">Semilla Acústica (Opcional):</label>
+          <input type="number" id="control-semilla" placeholder="Aleatoria si se omite">
+        </div>
+      </div>
+
+      <button id="btn-sintetizar" class="boton-primario" onclick="solicitarSintesis()">
+        <span class="icono-boton"></span> Sintetizar Voz
+      </button>
+
+      <div id="contenedor-resultado" class="panel-resultado oculto">
+        <div class="cabecera-resultado">
+          <h3>Audio Generado con Éxito</h3>
+          <span id="etiqueta-duracion" class="etiqueta-badge">0.0 s</span>
+        </div>
+        <audio id="reproductor-audio" controls class="reproductor-personalizado"></audio>
+        <div class="acciones-resultado">
+          <a id="enlace-descarga-audio" class="boton-secundario" download="audio_generado.wav">
+            ⬇ Descargar Archivo WAV
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. PESTAÑA DE CLONACIÓN DE VOZ -->
+    <section id="seccion-clonar" class="seccion-contenido">
+      <div class="cabecera-seccion">
+        <h2>Clonación de Nueva Voz</h2>
+        <p class="descripcion-seccion">Sube una muestra de audio limpia (de 5 a 15 segundos recomendados) para clonar el timbre vocal.</p>
+      </div>
+
+      <div class="campo-formulario">
+        <label for="campo-nombre-clon">Nombre de la Voz:</label>
+        <input type="text" id="campo-nombre-clon" placeholder="Ej: Narrador Español o Voz Corporativa">
+      </div>
+
+      <div class="campo-formulario">
+        <label for="campo-audio-clon">Archivo de Audio de Referencia (.wav, .mp3, .m4a):</label>
+        <div class="zona-arrastre" id="zona-arrastre-audio" onclick="document.getElementById('campo-audio-clon').click()">
+          <span class="icono-arrastre">🎵</span>
+          <p id="texto-archivo-audio">Haz clic o arrastra un archivo de audio aquí</p>
+          <span class="subtexto-arrastre">Muestra recomendada: 5 a 15 segundos de habla clara sin música de fondo</span>
+          <input type="file" id="campo-audio-clon" accept="audio/*" class="oculto">
+        </div>
+      </div>
+
+      <div class="campo-formulario">
+        <div class="cabecera-campo">
+          <label for="area-texto-referencia">Texto de Referencia Fonética (Opcional):</label>
+          <div class="acciones-documento">
+            <select id="formato-documento-clon" class="selector-pequeno">
+              <option value="markdown">Markdown</option>
+              <option value="txt">Texto plano</option>
+            </select>
+            <label for="entrada-documento-clon" class="boton-accion-secundaria">
+              📄 Subir Transcripción (PDF/TXT/MD)
+            </label>
+            <input type="file" id="entrada-documento-clon" accept=".pdf,.txt,.md,.markdown" class="oculto">
+          </div>
+        </div>
+        <textarea id="area-texto-referencia" rows="3" placeholder="Si se omite, se transcribirá automáticamente con el modelo ASR local..."></textarea>
+      </div>
+
+      <div class="fila-formulario dos-columnas">
+        <div class="campo-formulario">
+          <label for="campo-idioma-clon">Idioma de la Voz:</label>
+          <input type="text" id="campo-idioma-clon" value="es" placeholder="es, en, Auto">
+        </div>
+        <div class="campo-formulario">
+          <label for="campo-estilo-clon">Instrucciones de Estilo / Entonación:</label>
+          <input type="text" id="campo-estilo-clon" placeholder="Ej: tono cálido, profesional, pausado">
+        </div>
+      </div>
+
+      <button id="btn-guardar-clon" class="boton-primario" onclick="solicitarClonacionYGuardado()">
+        <span class="icono-boton">💾</span> Clonar y Guardar en la Biblioteca
+      </button>
+    </section>
+
+    <!-- 3. PESTAÑA DE BIBLIOTECA DE VOCES -->
+    <section id="seccion-biblioteca" class="seccion-contenido">
+      <div class="cabecera-seccion">
+        <div class="titulo-con-contador">
+          <h2>Voces Almacenadas en Base de Datos</h2>
+          <span id="contador-voces-total" class="etiqueta-badge">0 voces</span>
+        </div>
+        <p class="descripcion-seccion">Gestiona tus voces guardadas, escucha sus muestras originales o elimínalas.</p>
+      </div>
+
+      <div id="cuadricula-voces" class="cuadricula-tarjetas-voces">
+        <!-- Tarjetas dinámicas inyectadas por aplicacion.js -->
+      </div>
+    </section>
+  </div>
+
+  <div id="notificacion-flotante" class="notificacion-toast oculto"></div>
+
+  <script src="aplicacion.js"></script>
+</body>
+</html>

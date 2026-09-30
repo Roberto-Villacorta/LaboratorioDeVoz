@@ -1,0 +1,67 @@
+# ==============================================================================
+# .gitignore para EstudioDeVoz y PReal
+# Ignora archivos temporales, entornos virtuales, caches, base de datos y salidas
+# ==============================================================================
+
+# Entornos virtuales de Python
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Bytecode y cache de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Base de datos SQLite y datos generados en tiempo de ejecucion
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+datos/
+datos/voces/
+datos/salidas/
+PReal/backend/datos/
+PReal/datos/
+
+# Salidas de audio generadas y pruebas
+*.wav
+*.mp3
+*.ogg
+*.flac
+*.m4a
+
+# Archivos temporales y de subida de usuarios
+*.tmp
+*.temp
+subidas/
+salidas/
+
+# IDEs y editores de codigo
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Modelos descargados localmente (pesos pesados de Hugging Face / Torch)
+checkpoints/
+models/
+*.pt
+*.pth
+*.onnx
+*.bin

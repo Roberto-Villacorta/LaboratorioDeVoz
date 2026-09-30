@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estudio de Voz PReal</title>
+  <style>
+    :root {
+      --color-fondo: #0b0f19;
+      --color-panel: #151d30;
+      --color-borde: #23314f;
+      --color-primario: #6366f1;
+      --color-primario-hover: #4f46e5;
+      --color-texto: #f8fafc;
+      --color-subtexto: #94a3b8;
+      --color-exito: #10b981;
+      --color-peligro: #ef4444;
+      --radio-borde: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--color-fondo); color: var(--color-texto); padding: 2rem 1rem; display: flex; justify-content: center; min-height: 100vh; }
+    .contenedor { width: 100%; max-width: 960px; display: flex; flex-direction: column; gap: 1.5rem; }
+
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-borde); padding-bottom: 1.2rem; }
+    h1 { font-size: 1.8rem; background: linear-gradient(135deg, #a5b4fc, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    /* Pestañas */
+    .pestanas { display: flex; gap: 0.5rem; background: var(--color-panel); padding: 0.4rem; border-radius: var(--radio-borde); border: 1px solid var(--color-borde); }
+    .pestana-btn { flex: 1; padding: 0.85rem; border: none; background: transparent; color: var(--color-subtexto); font-weight: 600; cursor: pointer; border-radius: 10px; transition: all 0.2s; font-size: 0.95rem; }
+    .pestana-btn.activa { background: var(--color-primario); color: #fff; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35); }
+
+    /* Secciones */
+    .seccion { background: var(--color-panel); border: 1px solid var(--color-borde); border-radius: var(--radio-borde); padding: 1.8rem; display: none; flex-direction: column; gap: 1.3rem; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); }
+    .seccion.activa { display: flex; }
+
+    .grupo-campo { display: flex; flex-direction: column; gap: 0.5rem; }
+    label { font-size: 0.9rem; color: var(--color-subtexto); font-weight: 600; }
+    input, textarea, select { background: #0b0f19; border: 1px solid var(--color-borde); border-radius: 8px; padding: 0.85rem; color: #fff; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+    input:focus, textarea:focus, select:focus { border-color: var(--color-primario); }
+    textarea { resize: vertical; min-height: 110px; line-height: 1.5; }
+
+    .btn-principal { background: var(--color-primario); color: white; border: none; padding: 0.95rem 1.8rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.1s; font-size: 1rem; }
+    .btn-principal:hover { background: var(--color-primario-hover); }
+    .btn-principal:active { transform: scale(0.98); }
+
+    /* Cuadrícula de biblioteca */
+    .cuadricula-voces { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .tarjeta-voz { background: #0b0f19; border: 1px solid var(--color-borde); border-radius: 10px; padding: 1.2rem; display: flex; flex-direction: column; gap: 0.7rem; }
+    .tarjeta-voz h3 { font-size: 1.15rem; color: #fff; }
+    .tarjeta-voz p { font-size: 0.85rem; color: var(--color-subtexto); line-height: 1.4; }
+    .badge { display: inline-block; font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 999px; background: rgba(99, 102, 241, 0.15); color: #a5b4fc; font-weight: 600; width: fit-content; }
+
+    audio { width: 100%; margin-top: 0.5rem; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <header>
+      <h1>🎙️ Estudio de Voz PReal</h1>
+      <span class="badge" id="estado-conexion">API PReal Local</span>
+    </header>
+
+    <nav class="pestanas">
+      <button class="pestana-btn activa" onclick="mostrarPestana('sintesis')">1. Usar Voz (Síntesis)</button>
+      <button class="pestana-btn" onclick="mostrarPestana('clonar')">2. Clonar Voz</button>
+      <button class="pestana-btn" onclick="mostrarPestana('biblioteca')">3. Biblioteca de Voces</button>
+    </nav>
+
+    <!-- 1. PESTAÑA SÍNTESIS -->
+    <section id="sec-sintesis" class="seccion activa">
+      <h2>Generación y Uso de Voz</h2>
+      <div class="grupo-campo">
+        <label for="select-voz">Voz Activa:</label>
+        <select id="select-voz"><option value="">Cargando voces...</option></select>
+      </div>
+      <div class="grupo-campo">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label for="texto-sintesis">Texto o Guión a Sintetizar:</label>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <select id="formato-doc-sintesis" style="padding: 0.35rem 0.6rem; font-size: 0.8rem;">
+              <option value="markdown">Markdown</option>
+              <option value="txt">Texto plano</option>
+            </select>
+            <label for="doc-sintesis" class="badge" style="cursor: pointer; padding: 0.35rem 0.75rem; background: var(--color-primario); color: white;">
+              📄 Cargar PDF / TXT / MD
+            </label>
+            <input type="file" id="doc-sintesis" accept=".pdf,.txt,.md,.markdown" style="display: none;" onchange="procesarDocumento('doc-sintesis', 'texto-sintesis', 'formato-doc-sintesis')">
+          </div>
+        </div>
+        <textarea id="texto-sintesis" placeholder="Escribe aquí el guión que deseas sintetizar o sube un documento PDF/Markdown/TXT..."></textarea>
+      </div>
+      <div style="display: flex; gap: 1rem;">
+        <div class="grupo-campo" style="flex: 1;">
+          <label for="velocidad-sintesis">Velocidad (0.5x - 2.0x):</label>
+          <input type="number" id="velocidad-sintesis" value="1.0" step="0.1" min="0.5" max="2.0">
+        </div>
+        <div class="grupo-campo" style="flex: 1;">
+          <label for="semilla-sintesis">Semilla Acústica (Opcional):</label>
+          <input type="number" id="semilla-sintesis" placeholder="Aleatoria">
+        </div>
+      </div>
+      <button class="btn-principal" onclick="ejecutarSintesis()">🔊 Sintetizar Audio</button>
+
+      <div id="resultado-sintesis" style="display: none; margin-top: 1rem; border-top: 1px solid var(--color-borde); padding-top: 1.2rem;">
+        <h3>Audio Sintetizado:</h3>
+        <audio id="reproductor-resultado" controls></audio>
+      </div>
+    </section>
+
+    <!-- 2. PESTAÑA CLONAR -->
+    <section id="sec-clonar" class="seccion">
+      <h2>Clonar Nueva Voz</h2>
+      <div class="grupo-campo">
+        <label for="nombre-clon">Nombre de la Voz:</label>
+        <input type="text" id="nombre-clon" placeholder="Ej: Narrador Español">
+      </div>
+      <div class="grupo-campo">
+        <label for="archivo-clon">Archivo de Audio de Referencia (5 a 15 segundos recomendados):</label>
+        <input type="file" id="archivo-clon" accept="audio/*">
+      </div>
+      <div class="grupo-campo">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label for="texto-referencia-clon">Texto de la Referencia Fonética:</label>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <select id="formato-doc-clon" style="padding: 0.35rem 0.6rem; font-size: 0.8rem;">
+              <option value="markdown">Markdown</option>
+              <option value="txt">Texto plano</option>
+            </select>
+            <label for="doc-clon" class="badge" style="cursor: pointer; padding: 0.35rem 0.75rem; background: var(--color-primario); color: white;">
+              📄 Subir Transcripción (PDF/TXT/MD)
+            </label>
+            <input type="file" id="doc-clon" accept=".pdf,.txt,.md,.markdown" style="display: none;" onchange="procesarDocumento('doc-clon', 'texto-referencia-clon', 'formato-doc-clon')">
+          </div>
+        </div>
+        <textarea id="texto-referencia-clon" placeholder="Texto pronunciado en el audio para alineación fonética (o sube un PDF/TXT/MD)..."></textarea>
+      </div>
+      <button class="btn-principal" onclick="guardarClon()">💾 Guardar y Almacenar Voz</button>
+    </section>
+
+    <!-- 3. PESTAÑA BIBLIOTECA -->
+    <section id="sec-biblioteca" class="seccion">
+      <h2>Voces Almacenadas en la Base de Datos</h2>
+      <div class="cuadricula-voces" id="lista-voces">
+        <!-- Tarjetas dinámicas -->
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const API_URL = "http://127.0.0.1:8000/api";
+
+    function mostrarPestana(nombre) {
+      document.querySelectorAll('.pestana-btn').forEach(b => b.classList.remove('activa'));
+      document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+
+      if (nombre === 'sintesis') {
+        document.querySelector("button[onclick=\"mostrarPestana('sintesis')\"]").classList.add('activa');
+        document.getElementById('sec-sintesis').classList.add('activa');
+        cargarVoces();
+      } else if (nombre === 'clonar') {
+        document.querySelector("button[onclick=\"mostrarPestana('clonar')\"]").classList.add('activa');
+        document.getElementById('sec-clonar').classList.add('activa');
+      } else {
+        document.querySelector("button[onclick=\"mostrarPestana('biblioteca')\"]").classList.add('activa');
+        document.getElementById('sec-biblioteca').classList.add('activa');
+        cargarVoces();
+      }
+    }
+
+    async function cargarVoces() {
+      try {
+        const res = await fetch(`${API_URL}/voces`);
+        const voces = await res.json();
+
+        const select = document.getElementById("select-voz");
+        select.innerHTML = "";
+        voces.forEach(v => {
+          const opt = document.createElement("option");
+          opt.value = v.id;
+          opt.textContent = `${v.nombre} (${v.idioma || 'Auto'})`;
+          select.appendChild(opt);
+        });
+
+        const lista = document.getElementById("lista-voces");
+        lista.innerHTML = "";
+        if (voces.length === 0) {
+          lista.innerHTML = "<p style='color: var(--color-subtexto);'>No hay voces guardadas aún. Ve a 'Clonar Voz' para añadir una.</p>";
+        }
+        voces.forEach(v => {
+          const card = document.createElement("div");
+          card.className = "tarjeta-voz";
+          card.innerHTML = `
+            <h3>${v.nombre}</h3>
+            <p>${v.texto_referencia || 'Sin transcripción almacenada'}</p>
+            <span class="badge">${v.tipo} | ${v.idioma}</span>
+            <audio controls src="${API_URL}/voces/${v.id}/audio"></audio>
+            <button style="background: var(--color-peligro); color: #fff; border: none; padding: 0.5rem; border-radius: 6px; cursor: pointer; margin-top: 0.5rem; font-weight: 600;" onclick="eliminarVoz('${v.id}')">Eliminar</button>
+          `;
+          lista.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Error al cargar voces:", err);
+      }
+    }
+
+    async function guardarClon() {
+      const nombre = document.getElementById("nombre-clon").value.trim();
+      const archivoInput = document.getElementById("archivo-clon");
+      const texto = document.getElementById("texto-referencia-clon").value.trim();
+
+      if (!nombre || !archivoInput.files[0]) {
+        alert("Por favor indica un nombre y selecciona un archivo de audio.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("nombre", nombre);
+      formData.append("audio", archivoInput.files[0]);
+      formData.append("texto_referencia", texto);
+
+      try {
+        const res = await fetch(`${API_URL}/voces`, { method: "POST", body: formData });
+        if (res.ok) {
+          alert("¡Voz guardada exitosamente!");
+          document.getElementById("nombre-clon").value = "";
+          archivoInput.value = "";
+          document.getElementById("texto-referencia-clon").value = "";
+          mostrarPestana('sintesis');
+        } else {
+          const error = await res.json();
+          alert("Error al guardar: " + error.detail);
+        }
+      } catch (err) {
+        alert("No se pudo conectar con el servidor API.");
+      }
+    }
+
+    async function ejecutarSintesis() {
+      const idPerfil = document.getElementById("select-voz").value;
+      const texto = document.getElementById("texto-sintesis").value.trim();
+      const velocidad = parseFloat(document.getElementById("velocidad-sintesis").value) || 1.0;
+      const semillaVal = document.getElementById("semilla-sintesis").value;
+      const semilla = semillaVal ? parseInt(semillaVal) : null;
+
+      if (!idPerfil || !texto) {
+        alert("Selecciona una voz y escribe el texto a sintetizar.");
+        return;
+      }
+
+      const peticion = { id_perfil: idPerfil, texto: texto, velocidad: velocidad, semilla: semilla };
+      try {
+        const res = await fetch(`${API_URL}/sintetizar`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(peticion),
+        });
+
+        if (res.ok) {
+          const datos = await res.json();
+          const nombreArchivo = datos.ruta_archivo_audio.split(/[\\\\/]/).pop();
+          const reproductor = document.getElementById("reproductor-resultado");
+          reproductor.src = `${API_URL}/audio-salida/${nombreArchivo}`;
+          document.getElementById("resultado-sintesis").style.display = "block";
+          reproductor.play();
+        } else {
+          const error = await res.json();
+          alert("Error al sintetizar: " + error.detail);
+        }
+      } catch (err) {
+        alert("Error de conexión al sintetizar.");
+      }
+    }
+
+    async function procesarDocumento(idInputArchivo, idAreaTexto, idSelectFormato) {
+      const archivoInput = document.getElementById(idInputArchivo);
+      const areaTexto = document.getElementById(idAreaTexto);
+      const selectFormato = document.getElementById(idSelectFormato);
+      const formato = selectFormato ? selectFormato.value : "markdown";
+
+      if (!archivoInput.files || !archivoInput.files[0]) return;
+
+      const archivo = archivoInput.files[0];
+      const formData = new FormData();
+      formData.append("documento", archivo);
+      formData.append("formato_salida", formato);
+
+      try {
+        areaTexto.placeholder = "Extrayendo y formateando texto desde documento...";
+        const res = await fetch(`${API_URL}/transcripcion/subir-documento`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (res.ok) {
+          const datos = await res.json();
+          areaTexto.value = datos.texto;
+          alert(`¡Documento '${datos.nombre_archivo}' procesado con éxito (${datos.caracteres} caracteres en formato ${datos.formato_salida})!`);
+        } else {
+          const error = await res.json();
+          alert("Error procesando documento: " + error.detail);
+        }
+      } catch (err) {
+        alert("Error de conexión al subir el documento.");
+      } finally {
+        archivoInput.value = "";
+      }
+    }
+
+    async function eliminarVoz(id) {
+      if (!confirm("¿Seguro que deseas eliminar esta voz?")) return;
+      await fetch(`${API_URL}/voces/${id}`, { method: "DELETE" });
+      cargarVoces();
+    }
+
+    window.onload = cargarVoces;
+  </script>
+</body>
+</html>

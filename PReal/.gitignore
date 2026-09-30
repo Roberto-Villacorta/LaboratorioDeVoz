@@ -1,0 +1,35 @@
+# ==============================================================================
+# .gitignore para el modulo PReal
+# ==============================================================================
+
+# Python bytecode y cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Base de datos y almacenamiento persistente local
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+datos/
+backend/datos/
+
+# Salidas de audio
+*.wav
+*.mp3
+*.ogg
+*.flac
+
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# IDE y sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
